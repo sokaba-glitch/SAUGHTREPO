@@ -1,0 +1,687 @@
+
+
+import random
+
+# Game Data
+look_around_phrases = [
+    "You take in your surroundings.",
+    "You glance around cautiously.",
+    "Your eyes scan the area.",
+    "You survey your environment.",
+    "You take a moment to observe.",
+    "Your gaze sweeps the room.",
+    "You look around nervously.",
+    "You inspect your surroundings.",
+    "You cast a curious glance.",
+    "You examine the area closely.",
+    "Your vision pans across the space.",
+    "You scope out the scene.",
+    "You search for any clues.",
+    "You scrutinize the environment.",
+    "You explore your surroundings.",
+    "You get the lay of the land.",
+    "You familiarize yourself with the area.",
+    "You check out the digs.",
+    "You give the place a once-over.",
+    "You take stock of your situation.",
+    "You assess your surroundings.",
+    "You size up the environment.",
+    "You explore every nook.",
+    "You investigate the premises.",
+    "You reconnoiter the area.",
+    "You search high and low.",
+    "You look high and low.",
+    "You scan the horizon.",
+    "You peer into the distance.",
+    "You gaze about.",
+    "You cast about.",
+    "You look to your left and right.",
+    "You glance over your shoulder.",
+    "You survey the landscape.",
+    "You take a 360-degree view.",
+    "You absorb your surroundings.",
+    "You drink in the scenery.",
+    "You feast your eyes.",
+    "You behold the view.",
+    "You regard the landscape.",
+    "You contemplate your surroundings.",
+    "You ponder the environment.",
+    "You study the area.",
+    "You analyze your situation.",
+    "You consider your options.",
+    "You weigh your choices.",
+    "You scope out the possibilities."
+
+map_reference_phrases = [
+    "You unfold the map to get your bearings.",
+    "You consult the map for a location update.",
+    "You glance at the map to orient yourself.",
+    "You refer to the map for a spatial check.",
+    "You study the map to pinpoint your position.",
+    "You pull out the map to survey your surroundings.",
+    "You check the map for a directional refresh.",
+    "You peruse the map to reestablish your location.",
+    "You examine the map to determine your whereabouts.",
+    "You spread out the map to visualize your situation.",
+    "You look to the map for navigational clarity.",
+    "You review the map to confirm your coordinates.",
+    "You utilize the map to reassess your position.",
+    "You inspect the map to gauge your progress.",
+    "You consult the map to recalibrate your route.",
+    "You open the map to cross-reference your surroundings.",
+    "You check your map to ensure you're on track.",
+    "You take out the map to verify your location.",
+    "You glance at the map to update your mental layout.",
+    "You study the map to align with your environment.",
+    "You use the map to get a better sense of direction.",
+    "You refer to the map for spatial awareness.",
+    "You examine the map to match landmarks.",
+    "You consult the map to navigate the terrain.",
+    "You review the map to adjust your course.",
+    "You unfold the map to understand your context.",
+    "You look at the map to recognize familiar features.",
+    "You check the map to stay oriented.",
+    "You utilize the map to optimize your path.",
+    "You inspect the map to avoid getting lost.",
+    "You spread out the map to see the bigger picture.",
+    "You glance at the map to recall your objectives.",
+    "You study the map to uncover hidden passages.",
+    "You consult the map to find nearby resources.",
+    "You review the map to plan your next move.",
+    "You open the map to refresh your memory.",
+    "You take out the map to re-orient yourself.",
+    "You use the map to make informed decisions.",
+    "You examine the map to anticipate challenges.",
+    "You refer to the map for critical information.",
+    "You glance at the map to stay focused.",
+    "You consult the map to adapt to changes."
+]
+
+Keys = [
+    {
+        "Name": "Dungeon Key",
+        "Unlocks": ["Dungeon"],
+        "Desc": "A rusty old key, said to unlock the dungeon entrance."
+    },
+    {
+        "Name": "Rat Hair Key",
+        "Unlocks": ["Rat Hair Lair"],
+        "Desc": "Gnarled and twined, rat hair with a touch of swine, and a spec of skink."
+    }
+]
+
+Traps = {
+  "spike_trap": {
+    "effect": "damage",
+    "difficulty": 5,
+    "damage": 10
+  },
+  "poison_dart": {
+    "effect": "damage",
+    "difficulty": 3,
+    "damage": 5
+  },
+  "Rat Web": {
+    "effect": "damage",
+    "difficulty": 5,
+    "damage": 11
+  },
+  "fog": {
+    "effect": "damage",
+    "difficulty": 2,
+    "damage": 2
+  },
+  "pitfall": {
+    "effect": "damage",
+    "difficulty": 11,
+    "damage": 22
+  },
+  "book": {
+    "effect": "damage",
+    "difficulty": 20,
+    "damage": 1
+  }
+}
+rooms = {
+    "Merchants Caravan": {
+        "desc": "a sign says -You can also venture in!",
+        "in": "Guides Realm"
+        "action": "highlow"
+        
+    "Guides Realm": {
+        "desc": "a sign here says: -You can also venture down!- ..perhaps i should go out?",
+        "down" : "Nexus",
+        "action": "racechoice"
+    },
+    "Nexus": {
+        "desc": "The Nexus, a Finite Hub of Collected Places. Ancient energies spill out, whispering powers to those who grasp them.",
+        "north": "Shop",
+        "south": "Apothecary",
+        "east": "Inn",
+        "west": "Forge",
+        "in": "Guides Realm"
+    },
+    "Shop": {
+        "desc": "A bustling marketplace filled with exotic goods. Merchants peddle their wares, eager to strike a deal.",
+        "south": "Nexus",
+        "Key": "Dungeon Key"
+    },
+    "Inn": {
+        "desc": "A cozy resting place with warm fire and cold ale. Travelers share tales of adventure and danger.",
+        "west": "Nexus"
+    },
+    "Forge": {
+        "desc": "A fiery workshop where master smiths craft fine arms. The scent of hot metal and sweat fills the air.",
+        "east": "Nexus",
+        "action": "firstmainhand"
+    },
+    "Apothecary": {
+        "desc": "A mysterious shop filled with rare potions and herbs. The apothecary's knowledge is both vast and unsettling.",
+        "north": "Nexus",
+        "east": "Forest Trail",
+        "south": "Graveyard"
+    },
+    "Forest Trail": {
+        "desc": "A winding path through the Whispering Woods, where ancient trees loom and wild creatures roam.",
+        "west": "Apothecary",
+        "east": "Serene Clearing"
+    },
+    "Serene Clearing": {
+        "desc": "A tranquil glade, filled with wildflowers and the songs of birds. A weathered stone pedestal bears an inscription.",
+        "north": "Fortune Teller",
+        "west": "Forest Trail"
+    },
+    "Fortune Teller": {
+        "desc": "You stumble across the Fortune Tellers tent.",
+        "south": "Serene Clearing",
+        "action": "reading"
+    },
+    "Dungeon": {
+        "desc": "A dark and foreboding dungeon, filled with ancient secrets and hidden dangers.",
+        "north": "Exit",
+        "south": "Torture Chamber",
+        "east": "Musty Corridor",
+        "west": "Labyrinth",
+        "Requires": "Dungeon Key"
+    },
+    "Graveyard": {
+        "desc": "A grand yard, leading out of the dungeon and into death.",
+        "south": "Dungeon",
+        "north": "Apothecary"
+    },
+    "Musty Corridor": {
+        "desc": "A grim room filled with instruments of pain and suffering.",
+        "north": "Dungeon"
+    },
+    "Treasure Room": {
+        "desc": "A glittering trove of treasure, filled with gold and precious jewels.",
+        "west": "Dungeon"
+    },
+    "Labyrinth": {
+        "desc": "A confusing maze of twisting corridors and dark shadows.",
+        "east": "Dungeon",
+        "south": "A1"
+    },
+    'Rat Hair Lair': {
+        'desc': 'The Final Room of the Labyrinth, The Final Test Begins',
+        'north': '',
+        'south': '',
+        'east': '',
+        'west': 'A1',
+        'Requires': 'Rat Hair Key',
+        'Action' : 'Monstrous Hoard of Rats and Mice'
+    },
+    'A1': {
+        'desc': 'A dimly lit chamber with stone walls, scurries of all sizes can be heard from all locations.',
+        'north': 'Labyrinth',
+        'south': 'A2',
+        'east': 'Boss Lair',
+        'west': '',
+        'action': 'trap'
+           },
+    'A2': {
+        'desc': 'A narrow corridor with cobwebs, the stench here is.....',
+        'north': 'A1',
+        'south': 'A3',
+        'east': '',
+        'west': '',
+        'action': 'trap'
+           },
+    'A3': {
+        'desc': 'You can hear the pitter patter of rodents splashing in puddles, something sticky is dripping from the ceiling.',
+        'north': 'A2',
+        'south': 'A4',
+        'east': '',
+        'west': '',
+        'action': 'add'
+           },
+    'A4': {
+        'desc': 'A dark alcove with strange symbols, i dont know if i can manage this distance.',
+        'north': 'A3',
+        'south':'B1',
+        'east': '',
+        'west': '',
+        'action': 'trap'
+           },
+    'B1': {
+        'desc': 'A library with ancient tomes, You attempt to take a book and it tries to bite you.',
+        'north': 'A4',
+        'south': 'B2',
+        'east': '',
+        'west': '',
+        'action': 'block'
+           },
+    'B2': {
+        'desc': 'A laboratory with experimental equipment. What have these rodents done!?',
+        'north': 'B1',
+        'south': 'C1',
+        'east': '',
+        'west': '',        
+           },
+    'C1': {
+        'desc': 'A hidden chamber with treasure! oh... just treasure chests... all empty...',
+        'north': 'B2',
+        'south': 'C2',
+        'east': '',
+        'west': '',
+        'action': 'trap'
+           },
+    'C2': {
+        'desc': 'A crypt with ancient coffins with regal burial chambers, the art of the rats and mice on the wall is exquisite!',
+        'north': 'C1',
+        'south': 'C3',
+        'east': '',
+        'west': '',
+           },
+    'C3': {
+        'desc': 'A mausoleum with intricate carvings, You can see how rats are made by the carvings on the walls here.',
+        'north': 'C2',
+        'south': 'D1',
+        'east': '',
+        'west': '',
+        'action': 'trap'
+           },
+    'D1': {
+        'desc': 'A sign here reads -A hidden passage with narrow tunnels exists in the last room of the labyrinth- perhaps i would venture down?',
+        'north': 'C3',
+        'south': 'D2',
+        'east': '',
+        'west': '',
+        'action': 'trap'
+           },
+    'D2': {
+        'desc': 'A secret garden with magical plants, some with eyes, most.. err all of them have eyes!',
+        'north': 'D1',
+        'south': 'D3',
+        'east': '',
+        'west': '',
+        'trap': ""
+           },
+    'D3': {
+        'desc': 'A ancient temple with mysterious energie. Seriously... what the hell are they feeding these rats??',
+        'north': 'D2',
+        'south': 'E1',
+        'east': '',
+        'west': '',
+           },
+    'E1': {
+        'desc': 'A mysterious portal with otherworldly sounds lies in the east corner of the room.',
+        'north': 'D3',
+        'south': 'E2',
+        'east': '',
+        'west': '',
+        'trap': ""
+           },
+    'E2': {
+        'desc': "Humanoid rats stand a story above and hurl various spikey things at you!",
+        'north': 'E1',
+        'south': 'E3',
+        'east': '',
+        'west': '',
+        'action': 'trap'
+           },
+    'E3': {
+        'desc': 'Why would I ever choose to go down here?',
+        'north': 'E2',
+        'south': '',
+        'east': '',
+        'west': '',
+        'down': 'Trapdoor'  
+                 },  
+    'Trapdoor': {
+        'desc': 'A sign says -You remember  how to go down stairs!-',
+        'north': '',
+        'south': '',
+        'east': '',
+        'west': '',
+        'up' : 'E3',
+        'Key': 'Rat Hair Key'   
+    },
+}
+tarot = {
+    "The Magician": {
+        "hp_bonus1": 5,
+        "exp_gain1": 1,
+        "roll_mod1": 0.1
+    },
+    "The Priestess": {
+        "hp_bonus1": 10,
+        "exp_gain1": 1,
+        "roll_mod1": 0.75
+    },
+    "The Empress": {
+        "hp_bonus1": 5,
+        "exp_gain1": 2,
+        "roll_mod1": 1
+    },
+    "The Emperor": {
+        "hp_bonus1": 3,
+        "exp_gain1": 1,
+        "roll_mod1": 0.10
+    },
+    "The Hierophant": {
+        "hp_bonus1": 8,
+        "exp_gain1": 1,
+        "roll_mod1": 0.50
+    },
+    "The Chariot": {
+        "hp_bonus1": 4,
+        "exp_gain1": 1,
+        "roll_mod1": 0.75
+    },
+    "The Hermit": {
+        "hp_bonus1": 25,
+        "exp_gain1": 0.50,
+        "roll_mod1": 0.50
+    },
+    "The Fool": {
+        "hp_bonus1": 1,
+        "exp_gain1": 2,
+        "roll_mod1": 3
+    },
+    "Death": {
+        "hp_bonus1": -5,
+        "exp_gain1": 10,
+        "roll_mod1": 0.75
+    }
+}
+firstweapons = {
+    "Sword": {"roll_mod": +1},
+    "Bow": {"roll_mod": 1},
+    "Staff": {"roll_mod": 1},
+    "Mace":{"roll_mod": 1},
+    "Lute":{"roll_mod": 1}
+}
+races = {
+  "a Human": {
+    "hp_bonus2": 5,
+    "exp_gain2": 5,
+    "roll_mod2": 0.5
+  },
+  "a Dwarf": {
+    "hp_bonus2": 10,
+    "exp_gain2": 5,
+    "roll_mod2": 0.5
+  },
+  "an Elf": {
+    "hp_bonus2": 5,
+    "exp_gain2": 5,
+    "roll_mod2": 0.5
+  },
+  "a Goblin": {
+    "hp_bonus2": 30,
+    "exp_gain2": 0.5,
+    "roll_mod2": 0.5
+  },
+  "an Orc": {
+    "hp_bonus2": 5,
+    "exp_gain2": 5,
+    "roll_mod2": 3
+  },
+  "a Fungus": {
+    "hp_bonus2": 10,
+    "exp_gain2": 5,
+    "roll_mod2": 1
+  },
+  "an Ent": {
+    "hp_bonus2": 25,
+    "exp_gain2": 5,
+    "roll_mod2": 1
+  },
+  "a Mimic": {
+    "hp_bonus2": -25,
+    "exp_gain2": 2,
+    "roll_mod2": 1.75
+  },
+  "a Slime": {
+    "hp_bonus2": -50,
+    "exp_gain2": 10,
+    "roll_mod2": 2
+  }
+}
+
+class Player:
+    def __init__(self, name):
+        self.name = name
+        self.hp = 10
+        self.lvl = 1
+        self.exp = 1
+        self.gold = 1
+        self.inventory = []
+        self.mainhand = None
+        self.offhand = None
+        self.race = None
+        self.tarot = None
+        self.keys = 0
+        self.roll_mod = 0
+        self.current_room = "Guides Realm"
+        self.proc_trap(self.current_room, rooms)
+
+    def Venture(self, direction, rooms):
+        exits = [d for d, v in rooms[self.current_room].items() if d in ['north', 'south', 'east', 'west', 'in', 'out'] and v]
+        if direction in exits:
+            new_room = rooms[self.current_room][direction]
+            if "Requires" in rooms[new_room]:
+                required_key = rooms[new_room]["Requires"]
+                if required_key in self.inventory:
+                    self.inventory.remove(required_key)
+                    print(f"You unlocked {new_room}!")
+                else:
+                    print(f"{new_room} is locked. You need the {required_key}.")
+                return
+            print(f"You venture {direction} to {new_room}.")
+            print(f"{rooms[new_room]['desc']}")
+            self.current_room = new_room
+            self.pickup_key(new_room, rooms)
+            self.proc_trap(new_room, rooms)
+        else:
+            print(f"{self.name}, You cannot go that way.")
+
+    def pickup_key(self, room, rooms):
+        key_info = rooms[room].get("Key")
+        if key_info:
+            if isinstance(key_info, dict):
+                key_name = key_info["Name"]
+            else:
+                key_name = key_info
+            self.inventory.append(key_name)
+            print(f"You found the {key_name} in {room}!")
+
+    def proc_trap(self, room, rooms):
+        """
+        Process trap encounter in the given room.
+
+        Args:
+            room (str): Current room.
+            rooms (dict): Dictionary of rooms.
+        """
+
+        trap_info = rooms[room].get("Trap")
+
+        if trap_info:
+            trap_name = random.choice(list(traps.keys()))
+            trap = traps[trap_name]
+
+            print(f"You triggered the {trap_name}!")
+            print(f"Roll a d12 to avoid {trap['damage']} damage. Difficulty: {trap['difficulty']}")
+
+            input("Press Enter to roll d12 for trap check")
+            roll = self.roll(12)
+            print(f"You rolled: {roll}")
+
+            if roll < trap["difficulty"]:
+                self.hp -= trap["damage"]
+                print(f"You failed to avoid the trap! You took {trap['damage']} damage. Remaining HP: {self.hp}")
+            else:
+                print("You successfully avoided the trap!")
+        else:
+            print(random.choice(look_around_phrases))
+                
+    def starterweapon(self, room, rooms):
+        print("Choose your starter weapon:")
+        weapons = list(firstweapons)
+        print(", ".join(weapons[:-1]) + ", or " + weapons[-1])
+        while True:
+            choice = input("Type the name of your chosen weapon: ")
+            if choice in firstweapons:
+                self.mainhand = choice
+                self.roll_mod = firstweapons[choice]["roll_mod"]
+                print(f"You have chosen the {choice}.")
+                break
+            else:
+                print("That is not one of the gifts I offer. Please, I don't have all day.")
+
+    def reading(self, room, rooms):
+        while True:
+            answer = input("Would you like a reading? ").lower()
+            if answer == "yes":
+                self.tarot = random.choice(list(tarot))
+                self.hp += tarot[self.tarot]["hp_bonus1"]
+                self.exp += tarot[self.tarot]["exp_gain1"]
+                self.roll_mod += tarot[self.tarot]["roll_mod1"]
+                print(f"Now, {self.name}, You shall receive a reading, it will help you in the future.")
+                print(f"{self.name}, just so happens to call, {self.tarot}. Come back soon.")
+                break
+            elif answer == "no":
+                print(f"{self.name}, an unfortunate decision. Come back later.")
+                break
+            else:
+                print(f"{self.name}, I don't like repeating myself, yes or no?")
+                
+    def racechoice(self, room, rooms):
+        print("What race would you like to be?")
+        race = list(races)
+        print(", ".join(race[:-1]) + ", or " + race[-1])
+    
+        while True:
+            racechoice = input("Type the name of your chosen race: ")
+            if racechoice in races:
+                self.race = racechoice
+                self.hp += races[racechoice]["hp_bonus2"]
+                self.exp += races[racechoice]["exp_gain2"]
+                self.roll_mod += races[racechoice]["roll_mod2"]
+                print(f"{self.name}, you are now {self.race}. Farewell, Traveler.")
+                break
+            else:
+                print("Interesting, but not quite.")
+                
+    def gain_exp(self, amount):
+        self.exp += amount
+        print(f"Gained {amount} experience!")
+        self.level_up()
+
+    def level_up(self):
+        if self.exp >= self.lvl * 100:
+            self.lvl += 1
+            self.exp = 0
+            self.hp += 1
+            print(f"Leveled up to {self.lvl}! HP increased by 1.")
+
+    def roll(self, sides):
+        return random.randint(1, sides) + self.roll_mod 
+
+    def Map(self, rooms):
+        print(f"Current Location: {self.current_room}.")
+        print("Exits:")
+        for direction, room in rooms[self.current_room].items():
+                if direction in ['north', 'south', 'east', 'west']:
+                    print(f"- {direction}: {room}")
+                    
+    def minlow_encounter(self, rooms):
+        enemy = random.choice(enemies["minion"]["low"])
+        print(f"You have been attacked by a {enemy}!")
+        
+        while True:
+            input("Press enter to roll a d6")
+            user_roll = roll(6)
+            enemy_roll = random.randint(1, 6) 
+            print(f"{self.name}:{user_roll} VS {enemy}:{enemy_roll}")
+            if user_roll > enemy_roll   
+                print("You Succeded!")
+                gain_exp(15)
+            else:
+                print("You Failed!")
+                self.hp += user_roll - enemy_roll
+    
+
+
+
+print(r"                                                |>>>                             ")
+print(r"                                                |                                ")
+print(r"                                            _  _|_  _                            ")
+print(r"                                           |;|_|;|_|;|                           ")
+print(r"                                           \\.    .  /                           ")
+print(r"                                            \\:  .  /                            ")
+print(r"                                             ||:   |                             ")
+print(r"                                             ||:.  |                             ")                              
+print(r"                                             ||:  .|                             ")
+print(r"                                             ||:   |       \,/                   ")
+print(r"                                             ||: , |            /`\              ")
+print(r"                                             ||:   |                             ")
+print(r"                                             ||: . |                             ")
+print(r"              __                            _||_   |                             ")
+print(r"     ____--`~    '--~~__            __ ----~    ~`---,              ___          ")
+print(r"-~--~                   ~---__ ,--~'                  ~~----_____-~'   `~----~~  ")
+print("<=={==========>     <==========}==>")
+print("Welcome to Saught a text based RPG")
+print("<=={==========>     <==========}==>")
+name = input("What is your name?: ")
+        
+player = Player(name)        
+        
+while True:
+    action = input("Venture? (north, south, east, west, map) ").lower().strip()
+    if action in ['north', 'south', 'east', 'west', 'in', 'out']:
+        player.Venture(action, rooms)
+        if "action" in rooms[player.current_room]:
+            if rooms[player.current_room]["action"] == "reading":
+                player.reading(player.current_room, rooms)
+        if "action" in rooms[player.current_room]:
+            if rooms[player.current_room]["action"] == "firstmainhand":
+                player.starterweapon(player.current_room, rooms)
+        if "action" in rooms[player.current_room]:
+            if rooms[player.current_room]['action'] == "racechoice":
+                player.racechoice(player.current_room, rooms)
+        if "action" in rooms[player.current_room]:
+            if rooms[player.current_room]['action'] == "trap":
+                player.proc_trap(player.current_room, rooms)
+        if "action" in rooms[player.current_room]:
+            if rooms[player.current_room]['action'] == "add":
+                player.minlow_encounter(player.current_room, rooms)
+        if "action" in rooms[player.current_room]:
+            if rooms[player.current_room]['action'] == "block":
+                player.proc_trap(player.current_room, rooms)
+                player.minlow_encounter(player.current_room, rooms)
+        if "action" in rooms[player.current_room]:
+            if rooms[player.current_room]['action'] == "gamble":
+                player.highlow(player.current_room, rooms)
+                
+                    
+    elif action == "map":
+        print(random.choice(map_reference_phrases))
+        player.Map(rooms)
+
+    
+        
+        
+
